@@ -1,6 +1,8 @@
 const ws = require("ws");
 const WebSocket = ws.WebSocket;
 
+const midiDeviceNum = 3;
+
 async function connect() {
   let pingpong = 0;
   let $pong = 0;
@@ -44,8 +46,12 @@ async function connect() {
           console.log('Missed pongs:', pingpong - $pong);
         }
         break;
+      case 'midi':
+        console.log('Received response:', response);
+        playMIDI(response.message);
+        break;
       default:
-        console.log('Received unknown response:', response.response);
+        console.log('Received unknown response:', response);
     }
   }
 
@@ -53,3 +59,23 @@ async function connect() {
 
 connect();
 
+const midi = require('midi');
+
+// Set up a new output.
+const midiOutput = new midi.Output();
+
+// Count the available output ports.
+midiOutput.getPortCount();
+
+// Get the name of a specified output port.
+console.log(midiOutput.getPortName(midiDeviceNum));
+
+// Open the first available output port.
+//midiOutput.openVirtualPort("Client");
+midiOutput.openPort(midiDeviceNum);
+
+
+function playMIDI(list) {
+  //console.log('Playing MIDI:', list);
+  midiOutput.sendMessage(list);
+}
